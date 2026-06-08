@@ -36,8 +36,18 @@ export default function QuestionsList({
   const [option2, setOption2] = useState("");
   const [option3, setOption3] = useState("");
   const [option4, setOption4] = useState("");
+  const [polls, setPolls] = useState<any[]>([]);
 
   useEffect(() => setHydrated(true), []);
+  useEffect(() => {
+    async function loadPolls() {
+      const res = await fetch("/api/polls");
+      const data = await res.json();
+      setPolls(data);
+    }
+
+    loadPolls();
+  }, []);
 
   const syncInterestsFromServer = useCallback(async () => {
     const voterId = getVoterId();
@@ -189,7 +199,7 @@ export default function QuestionsList({
     console.log("Poll created");
 
     alert("Poll created successfully!");
-    
+
     setPollQuestion("");
     setOption1("");
     setOption2("");
@@ -436,6 +446,31 @@ export default function QuestionsList({
         </div>
       )}
       {/* Filter + search */}
+      {polls.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold">Polls</h2>
+
+          {polls.map((poll) => (
+            <div
+              key={poll.id}
+              className="rounded-2xl border bg-surface p-4 shadow-sm"
+            >
+              <h3 className="font-medium">{poll.title}</h3>
+
+              <div className="mt-3 space-y-2">
+                {poll.poll_options?.map((opt: any) => (
+                  <div
+                    key={opt.id}
+                    className="rounded-lg border px-3 py-2"
+                  >
+                    {opt.option_text}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="space-y-2">
         <div className="flex flex-wrap gap-2">
           <button
