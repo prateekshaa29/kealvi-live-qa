@@ -460,12 +460,36 @@ export default function QuestionsList({
 
               <div className="mt-3 space-y-2">
                 {poll.poll_options?.map((opt: any) => (
-                  <div
+                  <button
                     key={opt.id}
-                    className="rounded-lg border px-3 py-2"
+                    type="button"
+                    onClick={async () => {
+                      const res = await fetch("/api/polls/vote", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                          pollId: poll.id,
+                          optionId: opt.id,
+                          voterId: getVoterId(),
+                        }),
+                      });
+
+                      const data = await res.json();
+
+                      if (!res.ok) {
+                        alert(data.error);
+                        return;
+                      }
+
+                      alert("Vote recorded successfully!");
+                      window.location.reload();
+                    }}
+                    className="w-full rounded-lg border px-3 py-2 text-left hover:bg-gray-100"
                   >
                     {opt.option_text}
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
