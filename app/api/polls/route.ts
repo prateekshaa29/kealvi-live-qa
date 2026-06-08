@@ -2,7 +2,8 @@ import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const { data, error } = await supabase
+  console.log("GET ROUTE RUNNING");
+  const { data: polls, error } = await supabase
     .from("polls")
     .select(`
       *,
@@ -10,10 +11,39 @@ export async function GET() {
     `);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 
-  return NextResponse.json(data);
+  const pollsWithVotes = await Promise.all(
+    polls.map(async (poll: any) => {
+      const optionsWithVotes = await Promise.all(
+        poll.poll_options.map(async (option: any) => {
+          const { count } = await supabase
+            .from("poll_votes")
+            .select("*", {
+              count: "exact",
+              head: true,
+            })
+            .eq("option_id", option.id);
+
+          return {
+            ...option,
+            vote_count: count || 0,
+          };
+        })
+      );
+
+      return {
+        ...poll,
+        poll_options: optionsWithVotes,
+      };
+    })
+  );
+
+  return NextResponse.json(pollsWithVotes);
 }
 
 export async function POST(req: Request) {

@@ -488,7 +488,7 @@ export default function QuestionsList({
                     }}
                     className="w-full rounded-lg border px-3 py-2 text-left hover:bg-gray-100"
                   >
-                    {opt.option_text}
+                    {opt.option_text} ({opt.vote_count} votes)
                   </button>
                 ))}
               </div>
