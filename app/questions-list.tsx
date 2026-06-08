@@ -189,12 +189,15 @@ export default function QuestionsList({
     console.log("Poll created");
 
     alert("Poll created successfully!");
-
+    
     setPollQuestion("");
     setOption1("");
     setOption2("");
     setOption3("");
     setOption4("");
+
+    window.location.reload();
+
   }
   async function upvote(id: string) {
     setQuestions((qs) =>
