@@ -19,7 +19,8 @@ export default function QuestionsList({
 }) {
   const [questions, setQuestions] = useState(initialQuestions);
   const [draft, setDraft] = useState("");
-  const [authorName, setAuthorName] = useState("");
+  const [authorName, setAuthorName] = useState<string>("");
+  console.log("authorName =", authorName);
   const [categoryId, setCategoryId] = useState<string>("");
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [query, setQuery] = useState("");
@@ -29,6 +30,12 @@ export default function QuestionsList({
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [mode, setMode] = useState<"question" | "poll">("question");
+  const [pollQuestion, setPollQuestion] = useState("");
+  const [option1, setOption1] = useState("");
+  const [option2, setOption2] = useState("");
+  const [option3, setOption3] = useState("");
+  const [option4, setOption4] = useState("");
 
   useEffect(() => setHydrated(true), []);
 
@@ -48,10 +55,11 @@ export default function QuestionsList({
   }, []);
 
   useEffect(() => {
-    syncInterestsFromServer();
-    const saved = localStorage.getItem("kealvi_author");
-    if (saved) setAuthorName(saved);
-  }, [syncInterestsFromServer]);
+  syncInterestsFromServer();
+
+  const saved = localStorage.getItem("kealvi_author") ?? "";
+  setAuthorName(saved);
+}, [syncInterestsFromServer]);
 
   function buildQueryUrl(offset?: number) {
     const params = new URLSearchParams();
@@ -240,16 +248,45 @@ export default function QuestionsList({
       </section>
 
       {/* Ask */}
+      {/* Ask / Poll Toggle */}
+<div className="mb-4 flex gap-2">
+  <button
+    type="button"
+    onClick={() => setMode("question")}
+    className={`rounded-xl px-4 py-2 ${
+      mode === "question"
+        ? "bg-brand text-white"
+        : "border bg-surface"
+    }`}
+  >
+    Ask Question
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setMode("poll")}
+    className={`rounded-xl px-4 py-2 ${
+      mode === "poll"
+        ? "bg-brand text-white"
+        : "border bg-surface"
+    }`}
+  >
+    Create Poll
+  </button>
+</div>
+
+{/* Ask */}
+      {mode === "question" ? (
       <div className="rounded-2xl border bg-surface p-4 shadow-sm">
         <div className="space-y-2">
           <input
-            value={authorName}
+            value={authorName ?? ""}
             onChange={(e) => setAuthorName(e.target.value)}
             placeholder="Your name (optional)"
             className="w-full rounded-xl border bg-background px-4 py-2 text-sm outline-none placeholder:text-muted focus:border-brand"
           />
           <select
-            value={categoryId}
+            value={categoryId ?? ""}
             onChange={(e) => setCategoryId(e.target.value)}
             className="w-full rounded-xl border bg-background px-4 py-2 text-sm outline-none focus:border-brand"
           >
@@ -261,7 +298,7 @@ export default function QuestionsList({
             ))}
           </select>
           <textarea
-            value={draft}
+            value={draft ?? ""}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Ask a question…"
             rows={3}
@@ -309,7 +346,53 @@ export default function QuestionsList({
           </button>
         </div>
       </div>
+) : (
+  <div className="rounded-2xl border bg-surface p-4 shadow-sm">
+    <div className="space-y-2">
+      <input
+        value={pollQuestion}
+        onChange={(e) => setPollQuestion(e.target.value)}
+        placeholder="Poll Question"
+        className="w-full rounded-xl border px-4 py-2"
+      />
 
+      <input
+        value={option1}
+        onChange={(e) => setOption1(e.target.value)}
+        placeholder="Option 1"
+        className="w-full rounded-xl border px-4 py-2"
+      />
+
+      <input
+        value={option2}
+        onChange={(e) => setOption2(e.target.value)}
+        placeholder="Option 2"
+        className="w-full rounded-xl border px-4 py-2"
+      />
+
+      <input
+        value={option3}
+        onChange={(e) => setOption3(e.target.value)}
+        placeholder="Option 3"
+        className="w-full rounded-xl border px-4 py-2"
+      />
+
+      <input
+        value={option4}
+        onChange={(e) => setOption4(e.target.value)}
+        placeholder="Option 4"
+        className="w-full rounded-xl border px-4 py-2"
+      />
+
+      <button
+        type="button"
+        className="rounded-xl bg-brand px-5 py-2 text-white"
+      >
+        Create Poll
+      </button>
+    </div>
+  </div>
+)}
       {/* Filter + search */}
       <div className="space-y-2">
         <div className="flex flex-wrap gap-2">
