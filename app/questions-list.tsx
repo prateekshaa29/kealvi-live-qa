@@ -55,11 +55,11 @@ export default function QuestionsList({
   }, []);
 
   useEffect(() => {
-  syncInterestsFromServer();
+    syncInterestsFromServer();
 
-  const saved = localStorage.getItem("kealvi_author") ?? "";
-  setAuthorName(saved);
-}, [syncInterestsFromServer]);
+    const saved = localStorage.getItem("kealvi_author") ?? "";
+    setAuthorName(saved);
+  }, [syncInterestsFromServer]);
 
   function buildQueryUrl(offset?: number) {
     const params = new URLSearchParams();
@@ -155,43 +155,43 @@ export default function QuestionsList({
     setPendingFiles([]);
   }
   async function createPoll() {
-  if (!pollQuestion.trim()) {
-    alert("Enter a poll question");
-    return;
+    if (!pollQuestion.trim()) {
+      alert("Enter a poll question");
+      return;
+    }
+
+    if (!option1.trim() || !option2.trim()) {
+      alert("Enter at least 2 options");
+      return;
+    }
+
+    const res = await fetch("/api/polls", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: pollQuestion,
+        options: [option1, option2, option3, option4].filter(
+          (o) => o.trim() !== ""
+        ),
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      alert("Failed to create poll: " + err);
+      return;
+    }
+
+    alert("Poll created successfully!");
+
+    setPollQuestion("");
+    setOption1("");
+    setOption2("");
+    setOption3("");
+    setOption4("");
   }
-
-  if (!option1.trim() || !option2.trim()) {
-    alert("Enter at least 2 options");
-    return;
-  }
-
-  const res = await fetch("/api/polls", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      title: pollQuestion,
-      options: [option1, option2, option3, option4].filter(
-        (o) => o.trim() !== ""
-      ),
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    alert("Failed to create poll: " + err);
-    return;
-  }
-
-  alert("Poll created successfully!");
-
-  setPollQuestion("");
-  setOption1("");
-  setOption2("");
-  setOption3("");
-  setOption4("");
-}
   async function upvote(id: string) {
     setQuestions((qs) =>
       qs.map((q) => (q.id === id ? { ...q, votes: q.votes + 1 } : q))
@@ -265,11 +265,10 @@ export default function QuestionsList({
                 key={cat.id}
                 type="button"
                 onClick={() => toggleInterest(cat.id)}
-                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                  active
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${active
                     ? "border-transparent text-white"
                     : "bg-background text-muted hover:border-brand hover:text-brand"
-                }`}
+                  }`}
                 style={
                   active
                     ? { backgroundColor: cat.color, borderColor: cat.color }
@@ -286,161 +285,157 @@ export default function QuestionsList({
 
       {/* Ask */}
       {/* Ask / Poll Toggle */}
-<div className="mb-4 flex gap-2">
-  <button
-    type="button"
-    onClick={() => setMode("question")}
-    className={`rounded-xl px-4 py-2 ${
-      mode === "question"
-        ? "bg-brand text-white"
-        : "border bg-surface"
-    }`}
-  >
-    Ask Question
-  </button>
+      <div className="mb-4 flex gap-2">
+        <button
+          type="button"
+          onClick={() => setMode("question")}
+          className={`rounded-xl px-4 py-2 ${mode === "question"
+              ? "bg-brand text-white"
+              : "border bg-surface"
+            }`}
+        >
+          Ask Question
+        </button>
 
-  <button
-    type="button"
-    onClick={() => setMode("poll")}
-    className={`rounded-xl px-4 py-2 ${
-      mode === "poll"
-        ? "bg-brand text-white"
-        : "border bg-surface"
-    }`}
-  >
-    Create Poll
-  </button>
-</div>
-
-{/* Ask */}
-      {mode === "question" ? (
-      <div className="rounded-2xl border bg-surface p-4 shadow-sm">
-        <div className="space-y-2">
-          <input
-            value={authorName ?? ""}
-            onChange={(e) => setAuthorName(e.target.value)}
-            placeholder="Your name (optional)"
-            className="w-full rounded-xl border bg-background px-4 py-2 text-sm outline-none placeholder:text-muted focus:border-brand"
-          />
-          <select
-            value={categoryId ?? ""}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full rounded-xl border bg-background px-4 py-2 text-sm outline-none focus:border-brand"
-          >
-            <option value="">Category (optional)</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-          <textarea
-            value={draft ?? ""}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Ask a question…"
-            rows={3}
-            className="w-full resize-none rounded-xl border bg-background px-4 py-2.5 text-sm outline-none placeholder:text-muted focus:border-brand"
-          />
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="cursor-pointer rounded-xl border bg-background px-3 py-2 text-xs font-medium text-muted transition-colors hover:border-brand hover:text-brand">
-              Attach files
-              <input
-                type="file"
-                multiple
-                className="hidden"
-                accept="image/*,.pdf,.txt,.doc,.docx"
-                onChange={(e) => {
-                  const files = [...(e.target.files ?? [])];
-                  setPendingFiles((prev) => [...prev, ...files].slice(0, 3));
-                  e.target.value = "";
-                }}
-              />
-            </label>
-            {pendingFiles.map((f, i) => (
-              <span
-                key={`${f.name}-${i}`}
-                className="rounded-full bg-brand-soft px-2 py-1 text-xs text-brand"
-              >
-                {f.name}
-                <button
-                  type="button"
-                  className="ml-1"
-                  onClick={() =>
-                    setPendingFiles((prev) => prev.filter((_, j) => j !== i))
-                  }
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={submit}
-            className="w-full rounded-xl bg-brand py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-strong sm:w-auto sm:px-6"
-          >
-            Ask
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setMode("poll")}
+          className={`rounded-xl px-4 py-2 ${mode === "poll"
+              ? "bg-brand text-white"
+              : "border bg-surface"
+            }`}
+        >
+          Create Poll
+        </button>
       </div>
-) : (
-  <div className="rounded-2xl border bg-surface p-4 shadow-sm">
-    <div className="space-y-2">
-      <input
-        value={pollQuestion}
-        onChange={(e) => setPollQuestion(e.target.value)}
-        placeholder="Poll Question"
-        className="w-full rounded-xl border px-4 py-2"
-      />
 
-      <input
-        value={option1}
-        onChange={(e) => setOption1(e.target.value)}
-        placeholder="Option 1"
-        className="w-full rounded-xl border px-4 py-2"
-      />
+      {/* Ask */}
+      {mode === "question" ? (
+        <div className="rounded-2xl border bg-surface p-4 shadow-sm">
+          <div className="space-y-2">
+            <input
+              value={authorName ?? ""}
+              onChange={(e) => setAuthorName(e.target.value)}
+              placeholder="Your name (optional)"
+              className="w-full rounded-xl border bg-background px-4 py-2 text-sm outline-none placeholder:text-muted focus:border-brand"
+            />
+            <select
+              value={categoryId ?? ""}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full rounded-xl border bg-background px-4 py-2 text-sm outline-none focus:border-brand"
+            >
+              <option value="">Category (optional)</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <textarea
+              value={draft ?? ""}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Ask a question…"
+              rows={3}
+              className="w-full resize-none rounded-xl border bg-background px-4 py-2.5 text-sm outline-none placeholder:text-muted focus:border-brand"
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="cursor-pointer rounded-xl border bg-background px-3 py-2 text-xs font-medium text-muted transition-colors hover:border-brand hover:text-brand">
+                Attach files
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  accept="image/*,.pdf,.txt,.doc,.docx"
+                  onChange={(e) => {
+                    const files = [...(e.target.files ?? [])];
+                    setPendingFiles((prev) => [...prev, ...files].slice(0, 3));
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              {pendingFiles.map((f, i) => (
+                <span
+                  key={`${f.name}-${i}`}
+                  className="rounded-full bg-brand-soft px-2 py-1 text-xs text-brand"
+                >
+                  {f.name}
+                  <button
+                    type="button"
+                    className="ml-1"
+                    onClick={() =>
+                      setPendingFiles((prev) => prev.filter((_, j) => j !== i))
+                    }
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={submit}
+              className="w-full rounded-xl bg-brand py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-strong sm:w-auto sm:px-6"
+            >
+              Ask
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-2xl border bg-surface p-4 shadow-sm">
+          <div className="space-y-2">
+            <input
+              value={pollQuestion}
+              onChange={(e) => setPollQuestion(e.target.value)}
+              placeholder="Poll Question"
+              className="w-full rounded-xl border px-4 py-2"
+            />
 
-      <input
-        value={option2}
-        onChange={(e) => setOption2(e.target.value)}
-        placeholder="Option 2"
-        className="w-full rounded-xl border px-4 py-2"
-      />
+            <input
+              value={option1}
+              onChange={(e) => setOption1(e.target.value)}
+              placeholder="Option 1"
+              className="w-full rounded-xl border px-4 py-2"
+            />
 
-      <input
-        value={option3}
-        onChange={(e) => setOption3(e.target.value)}
-        placeholder="Option 3"
-        className="w-full rounded-xl border px-4 py-2"
-      />
+            <input
+              value={option2}
+              onChange={(e) => setOption2(e.target.value)}
+              placeholder="Option 2"
+              className="w-full rounded-xl border px-4 py-2"
+            />
 
-      <input
-        value={option4}
-        onChange={(e) => setOption4(e.target.value)}
-        placeholder="Option 4"
-        className="w-full rounded-xl border px-4 py-2"
-      />
+            <input
+              value={option3}
+              onChange={(e) => setOption3(e.target.value)}
+              placeholder="Option 3"
+              className="w-full rounded-xl border px-4 py-2"
+            />
 
-      <button
-        type="button"
-        onClick={createPoll}
-        className="rounded-xl bg-brand px-5 py-2 text-white"
-      >
-  Create Poll
-</button>
-      </button>
-    </div>
-  </div>
-)}
+            <input
+              value={option4}
+              onChange={(e) => setOption4(e.target.value)}
+              placeholder="Option 4"
+              className="w-full rounded-xl border px-4 py-2"
+            />
+
+            <button
+              type="button"
+              onClick={createPoll}
+              className="rounded-xl bg-brand px-5 py-2 text-white"
+            >
+              Create Poll
+            </button>
+          </div>
+        </div>
+      )}
       {/* Filter + search */}
       <div className="space-y-2">
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setFilterCategory("")}
-            className={`rounded-full border px-3 py-1 text-xs ${
-              !filterCategory ? "bg-brand-soft font-medium text-brand" : "text-muted"
-            }`}
+            className={`rounded-full border px-3 py-1 text-xs ${!filterCategory ? "bg-brand-soft font-medium text-brand" : "text-muted"
+              }`}
           >
             All
           </button>
@@ -452,11 +447,10 @@ export default function QuestionsList({
                 setFilterCategory(cat.id);
                 setMyInterestsOnly(false);
               }}
-              className={`rounded-full border px-3 py-1 text-xs ${
-                filterCategory === cat.id
+              className={`rounded-full border px-3 py-1 text-xs ${filterCategory === cat.id
                   ? "font-medium text-white"
                   : "text-muted"
-              }`}
+                }`}
               style={
                 filterCategory === cat.id
                   ? { backgroundColor: cat.color, borderColor: cat.color }
@@ -485,9 +479,8 @@ export default function QuestionsList({
         {questions.map((q) => (
           <li
             key={q.id}
-            className={`flex items-start gap-3 rounded-2xl border bg-surface p-4 shadow-sm transition-shadow hover:shadow-md ${
-              q.pinned ? "ring-2 ring-brand/30" : ""
-            }`}
+            className={`flex items-start gap-3 rounded-2xl border bg-surface p-4 shadow-sm transition-shadow hover:shadow-md ${q.pinned ? "ring-2 ring-brand/30" : ""
+              }`}
           >
             <button
               type="button"
