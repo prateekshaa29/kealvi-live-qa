@@ -43,6 +43,7 @@ export default function QuestionsList({
     async function loadPolls() {
       const res = await fetch("/api/polls");
       const data = await res.json();
+      console.log("POLLS DATA:", data);
       setPolls(data);
     }
 
