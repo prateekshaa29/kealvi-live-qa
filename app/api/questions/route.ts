@@ -34,13 +34,12 @@ export async function POST(req: Request) {
   const { body, author, categoryId, voterId } = await req.json();
 
   const { data, error } = await supabase
-    .from("questions")
-    .insert({
-      body,
-      author: author ?? "Anonymous",
-      category_id: categoryId ?? null,
-      author_voter_id: voterId ?? null,
-    })
+  .from("questions")
+  .insert({
+    body,
+    author: author ?? "Anonymous",
+    category_id: categoryId ?? null,
+  })
     .select(
       "id, body, author, pinned, category:categories(id, name, slug, color)"
     )
