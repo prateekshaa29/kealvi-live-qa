@@ -155,6 +155,7 @@ export default function QuestionsList({
     setPendingFiles([]);
   }
   async function createPoll() {
+    console.log("CREATE POLL CLICKED");
     if (!pollQuestion.trim()) {
       alert("Enter a poll question");
       return;
@@ -180,9 +181,12 @@ export default function QuestionsList({
 
     if (!res.ok) {
       const err = await res.text();
+      console.log("API Error:", err);
       alert("Failed to create poll: " + err);
       return;
     }
+
+    console.log("Poll created");
 
     alert("Poll created successfully!");
 
@@ -266,8 +270,8 @@ export default function QuestionsList({
                 type="button"
                 onClick={() => toggleInterest(cat.id)}
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${active
-                    ? "border-transparent text-white"
-                    : "bg-background text-muted hover:border-brand hover:text-brand"
+                  ? "border-transparent text-white"
+                  : "bg-background text-muted hover:border-brand hover:text-brand"
                   }`}
                 style={
                   active
@@ -290,8 +294,8 @@ export default function QuestionsList({
           type="button"
           onClick={() => setMode("question")}
           className={`rounded-xl px-4 py-2 ${mode === "question"
-              ? "bg-brand text-white"
-              : "border bg-surface"
+            ? "bg-brand text-white"
+            : "border bg-surface"
             }`}
         >
           Ask Question
@@ -301,8 +305,8 @@ export default function QuestionsList({
           type="button"
           onClick={() => setMode("poll")}
           className={`rounded-xl px-4 py-2 ${mode === "poll"
-              ? "bg-brand text-white"
-              : "border bg-surface"
+            ? "bg-brand text-white"
+            : "border bg-surface"
             }`}
         >
           Create Poll
@@ -448,8 +452,8 @@ export default function QuestionsList({
                 setMyInterestsOnly(false);
               }}
               className={`rounded-full border px-3 py-1 text-xs ${filterCategory === cat.id
-                  ? "font-medium text-white"
-                  : "text-muted"
+                ? "font-medium text-white"
+                : "text-muted"
                 }`}
               style={
                 filterCategory === cat.id
