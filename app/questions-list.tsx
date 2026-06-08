@@ -154,7 +154,44 @@ export default function QuestionsList({
     setDraft("");
     setPendingFiles([]);
   }
+  async function createPoll() {
+  if (!pollQuestion.trim()) {
+    alert("Enter a poll question");
+    return;
+  }
 
+  if (!option1.trim() || !option2.trim()) {
+    alert("Enter at least 2 options");
+    return;
+  }
+
+  const res = await fetch("/api/polls", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title: pollQuestion,
+      options: [option1, option2, option3, option4].filter(
+        (o) => o.trim() !== ""
+      ),
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    alert("Failed to create poll: " + err);
+    return;
+  }
+
+  alert("Poll created successfully!");
+
+  setPollQuestion("");
+  setOption1("");
+  setOption2("");
+  setOption3("");
+  setOption4("");
+}
   async function upvote(id: string) {
     setQuestions((qs) =>
       qs.map((q) => (q.id === id ? { ...q, votes: q.votes + 1 } : q))
@@ -386,9 +423,11 @@ export default function QuestionsList({
 
       <button
         type="button"
+        onClick={createPoll}
         className="rounded-xl bg-brand px-5 py-2 text-white"
       >
-        Create Poll
+  Create Poll
+</button>
       </button>
     </div>
   </div>
