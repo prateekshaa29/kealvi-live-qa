@@ -155,7 +155,7 @@ export default function QuestionsList({
     setPendingFiles([]);
   }
   async function createPoll() {
-    console.log("CREATE POLL CLICKED");
+    alert("CREATE POLL CLICKED");
     if (!pollQuestion.trim()) {
       alert("Enter a poll question");
       return;
