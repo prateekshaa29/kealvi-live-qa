@@ -229,24 +229,42 @@ export default function QuestionsList({
   }
 
   async function togglePin(id: string, currentlyPinned: boolean) {
+    // Get latest pinned count
+    const pinnedCount = questions.filter((q) => q.pinned).length;
+
+    // Only check limit when pinning
+    if (!currentlyPinned && pinnedCount >= 3) {
+      alert("Only 3 questions can be pinned at a time.");
+      return;
+    }
+
     const res = await fetch(`/api/questions/${id}/pin`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pinned: !currentlyPinned }),
     });
-    if (!res.ok) return;
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+
+      if (data?.error) {
+        alert(data.error);
+      }
+
+      return;
+    }
 
     setQuestions((qs) => {
       const updated = qs.map((q) =>
         q.id === id ? { ...q, pinned: !currentlyPinned } : q
       );
+
       return updated.sort((a, b) => {
         if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
         return 0;
       });
     });
   }
-
   async function loadMore() {
     setLoading(true);
     const res = await fetch(buildQueryUrl(questions.length));
